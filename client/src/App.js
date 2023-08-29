@@ -3,7 +3,7 @@ import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import {Home} from "./pages/home";
 import {Auth} from "./pages/auth";
 import {CreateRecepie} from "./pages/create-recepie";
-import {SavedRecepies} from "./pages/saved-recepies";
+import {SavedRecipes} from "./pages/saved-recepies";
 import {Navbar} from './components/navbar';
 
 function App() {
@@ -15,7 +15,7 @@ function App() {
           <Route path="/" element={<Home/>} />
           <Route path="/auth" element={<Auth/>} />
           <Route path="/create-recepie" element={<CreateRecepie/>} />
-          <Route path="/saved-recepies" element={<SavedRecepies/>} />
+          <Route path="/saved-recepies" element={<SavedRecipes/>} />
         </Routes>
       </Router>
     </div>
