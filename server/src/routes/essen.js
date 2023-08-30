@@ -1,6 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { RecipeModel } from "../models/Recepies.js";
+import { EssenModel } from "../models/Essen.js";
 import { UserModel } from '../models/Users.js';
 import {verifyToken} from "./users.js";
 
@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
     try {
-        const response = await RecipeModel.find({});
+        const response = await EssenModel.find({});
         res.json(response);
     } catch (err) {
         res.json(err);
@@ -16,9 +16,9 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", verifyToken, async (req, res) => {
-    const recipe = new RecipeModel(req.body);
+    const essen = new EssenModel(req.body);
     try {
-        const response = await recipe.save();
+        const response = await essen.save();
         res.json(response);
     } catch (err) {
         res.json(err);
@@ -27,9 +27,9 @@ router.post("/", verifyToken, async (req, res) => {
 
 router.put("/", verifyToken, async (req, res) => {
     try {
-        const recipe = await RecipeModel.findById(req.body.recipeID);
+        const essen = await EssenModel.findById(req.body.essenID);
         const user = await UserModel.findById(req.body.userID);
-        user.savedRecipes.push(recipe);
+        user.savedRecipes.push(essen);
         await user.save();
         res.json({savedRecipes: user.savedRecipes});
     } catch (err) {
@@ -58,5 +58,5 @@ router.get("/savedRecipes/:userID", async (req, res) => {
     }
 });
 
-export {router as recipesRouter};
+export {router as essenRouter};
 

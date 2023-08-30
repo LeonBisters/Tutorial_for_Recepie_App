@@ -3,7 +3,7 @@ import cors from 'cors'; // cors erlaubt es die Kommunikations-Regeln zwischen F
 import mongoose from 'mongoose'; // ist die Datenbank MongoDB
 
 import {userRouter} from './routes/users.js';
-import {recipesRouter} from './routes/recipes.js';
+import { essenRouter } from "./routes/essen.js";
 
 const app = express();
 
@@ -11,7 +11,7 @@ app.use(express.json()); // diese Zeile wandelt alle Daten die aus dem Frontend 
 app.use(cors());
 
 app.use("/auth", userRouter);
-app.use("/recipes", recipesRouter);
+app.use("/essen", essenRouter);
 
 mongoose.connect("mongodb+srv://webmo:webmo@cluster0.natgdma.mongodb.net/webmo?retryWrites=true&w=majority");
 
