@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 
 const SelectedEssenSchema = new mongoose.Schema({
     id: { type: mongoose.Schema.Types.ObjectId, ref: 'essen' },
-    name: String
 });
 
 const EssenPlanSchema = new mongoose.Schema({
