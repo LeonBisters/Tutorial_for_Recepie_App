@@ -12,6 +12,7 @@ app.use(cors());
 
 app.use("/auth", userRouter);
 app.use("/essen", essenRouter);
+//TODO Hier muss vermutlich der essensplanRouter hinzugefügt werden
 
 mongoose.connect("mongodb+srv://webmo:webmo@cluster0.natgdma.mongodb.net/webmo?retryWrites=true&w=majority");
 
