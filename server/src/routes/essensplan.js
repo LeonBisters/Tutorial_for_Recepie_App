@@ -37,28 +37,6 @@ router.put("/", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/savedRecipes/ids/:userID", async (req, res) => {
-    try {
-        const user = await UserModel.findById(req.params.userID);
-        res.json({savedRecipes : user?.savedRecipes});
-    } catch (err) {
-        res.json(err);
-    }
-});
-
-router.get("/savedRecipes/:userID", async (req, res) => {
-    try {
-        const user = await UserModel.findById(req.params.userID);
-        const savedRecipes = await RecipeModel.find({
-            _id: {$in: user.savedRecipes},
-        })
-        res.json({savedRecipes});
-    } catch (err) {
-        res.json(err);
-    }
-});
-
-
 //Zum bearbeiten
 router.put("/:id", verifyToken, async (req, res) => {
     const { id } = req.params; // Die ID des zu bearbeitenden Essens
