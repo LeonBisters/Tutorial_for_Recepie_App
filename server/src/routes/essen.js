@@ -58,5 +58,37 @@ router.get("/savedRecipes/:userID", async (req, res) => {
     }
 });
 
+
+//Zum bearbeiten
+router.put("/:id", verifyToken, async (req, res) => {
+    const { id } = req.params; // Die ID des zu bearbeitenden Essens
+
+    try {
+        const updatedEssen = await EssenModel.findByIdAndUpdate(
+            id, // ID des Essens
+            { $set: req.body }, // Neue Daten für das Essen
+            { new: true } // Rückgabe des aktualisierten Eintrags
+        );
+
+        res.json(updatedEssen);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
+//Zum Löschen 
+router.delete("/:id", verifyToken, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedEssen = await EssenModel.findByIdAndDelete(id);
+        res.json(deletedEssen);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
+
+
 export {router as essenRouter};
 
