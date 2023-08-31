@@ -16,12 +16,12 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", verifyToken, async (req, res) => {
-    const essen = new EssenPlanModel(req.body);
+    const essenPlan = new EssenPlanModel(req.body);
     try {
-        const response = await essen.save();
+        const response = await essenPlan.save();
         res.json(response);
     } catch (err) {
-        res.json(err);
+        res.status(500).json(err);
     }
 });
 
