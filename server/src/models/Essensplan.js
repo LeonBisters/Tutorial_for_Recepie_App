@@ -1,18 +1,18 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const SelectedEssenSchema = new mongoose.Schema({
-    id: { type: mongoose.Schema.Types.ObjectId, ref: 'essen' },
+  id: { type: mongoose.Schema.Types.ObjectId, ref: "essen" },
 });
 
 const EssenPlanSchema = new mongoose.Schema({
-    wochenNummer: { type: Number, required: true },
-    essenProWoche: {
-        montag: SelectedEssenSchema,
-        dienstag: SelectedEssenSchema,
-        mittwoch: SelectedEssenSchema,
-        donnerstag: SelectedEssenSchema,
-        freitag: SelectedEssenSchema
-    }
+  wochenNummer: { type: Number, required: true },
+  essenProWoche: {
+    montag: SelectedEssenSchema,
+    dienstag: SelectedEssenSchema,
+    mittwoch: SelectedEssenSchema,
+    donnerstag: SelectedEssenSchema,
+    freitag: SelectedEssenSchema,
+  },
 });
 
 export const EssenPlanModel = mongoose.model("essenPlan", EssenPlanSchema);

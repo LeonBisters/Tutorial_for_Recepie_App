@@ -1,83 +1,149 @@
 import { useEffect, useState } from "react";
-import axios from 'axios';
-import {useCookies} from 'react-cookie';
+import axios from "axios";
+import { useCookies } from "react-cookie";
+
+const WEEKDAYS = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag"];
 
 export const Home = () => {
-    const [cookies, _] = useCookies(["access_token"]);
-    const [selectedEssen, setSelectedEssen] = useState({
+  const [cookies] = useCookies(["access_token"]);
+
+  const [availableEssen, setAvailableEssen] = useState([]);
+  const [availableEssenPlans, setAvailableEssenPlans] = useState([]);
+
+  const [essenPlan, setEssenplan] = useState({
+    wochenNummer: 0,
+    essenProWoche: {
+      montag: null,
+      dienstag: null,
+      mittwoch: null,
+      donnerstag: null,
+      freitag: null,
+    },
+  });
+
+  const handleWeekNumberChange = (event) =>
+    setEssenplan({
+      essenProWoche: {
         montag: null,
         dienstag: null,
         mittwoch: null,
         donnerstag: null,
-        freitag: null
+        freitag: null,
+      },
+      wochenNummer: parseInt(event.target.value),
     });
 
-    const [essenPlan, setEssenplan] = useState({
-        wochenNummer: 0,
-        essenProWoche: selectedEssen,
+  const handleMealChange = (event) =>
+    setEssenplan({
+      ...essenPlan,
+      essenProWoche: {
+        ...essenPlan.essenProWoche,
+        [event.target.id]: { id: event.target.value },
+      },
     });
 
-    const handleChange = (event) => {
-        const {name, value} = event.target;
-        setEssenplan({ ...essenPlan, [name]: value});
-    };
+  const fetchAvailableEssen = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/essen");
+      setAvailableEssen(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const [availableEssen, setAvailableEssen] = useState([]);
+  const fetchAvailableEssenPlans = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/essenplan");
+      setAvailableEssenPlans(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    useEffect(() => {
-        fetchAvailableEssen();
-    }, []);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-    const fetchAvailableEssen = async () => {
-        try {
-            const response = await axios.get("http://localhost:3001/essen");
-            setAvailableEssen(response.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+    try {
+      await axios.post("http://localhost:3001/essenplan", essenPlan, {
+        headers: { authorization: cookies.access_token },
+      });
+      console.log("handleSubmit-Essensplan", essenPlan);
+      alert("Essensplan erstellt");
+    } catch (err) {
+      if (err.response.request.status === 400) {
+        alert(
+          "Der Essensplan wurde bereits für diese Woche erstellt. Bitte ändere ihn."
+        );
+      }
+      if (err.response.request.status === 500) {
+        console.error(err);
+        alert(
+          "Beim Speichern des Essensplans ist ein unbekannter Fehler aufgetreten."
+        );
+      }
+    }
+  };
 
-    const handleSelectChange = (day, selectedValue) => {
-        setSelectedEssen(prevSelectedEssen => ({
-            ...prevSelectedEssen,
-            [day]: selectedValue
-        }));
-    };
+  useEffect(() => {
+    fetchAvailableEssen();
+    fetchAvailableEssenPlans();
+  }, []);
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
+  /*   const handleSelectChange = (day, selectedValue) => {
+    setSelectedEssen((prevSelectedEssen) => ({
+      ...prevSelectedEssen,
+      [day]: selectedValue,
+    }));
+  }; */
 
-        try {
-            await axios.post("http://localhost:3001/essenplan", essenPlan, {headers: {authorization: cookies.access_token}});
-            alert("Essensplan erstellt");
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  useEffect(() => {
+    console.log("USEFFECT essenPlan", essenPlan);
+  }, [essenPlan]);
 
-    return (
-            <div className="create-essenplan">
-                <h2>Essensplan erstellen</h2>
-                <form onSubmit={handleSubmit}>
-                    <label htmlFor="wochenNummer">Wochennummer</label>
-                    <input type="number" id="wochenNummer" name="wochenNummer" onChange={handleChange}/>
-                    <div>
-                        {Object.keys(selectedEssen).map(day => (
-                            <div key={day}>
-                                <label htmlFor={day}>{day.charAt(0).toUpperCase() + day.slice(1)}</label>
-                                <select id={day} name={day}  onChange={handleChange}>
-                                    <option value={null}>Kein Essen ausgewählt</option>
-                                    {availableEssen.map(essen => (
-                                        <option key={essen._id} value={essen._id}>{essen.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        ))}
-                    </div>
-                    <button type="submit">Essensplan erstellen</button>
-                </form>
-            </div>
-    );
+  useEffect(() => {
+    console.log("USEFFECT availableEssen", availableEssen);
+  }, [availableEssen]);
+
+  useEffect(() => {
+    console.log("USEFFECT availableEssenPlans", availableEssenPlans);
+  }, [availableEssenPlans]);
+
+  return (
+    <div className="create-essenplan">
+      <h2>Essensplan erstellen</h2>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="wochenNummer">Wochennummer</label>
+        <input
+          type="number"
+          id="wochenNummer"
+          name="wochenNummer"
+          onChange={handleWeekNumberChange}
+        />
+        <div>
+          {essenPlan.wochenNummer > 0 &&
+            WEEKDAYS.map((day) => (
+              <div
+                key={day}
+                style={{ display: "flex", flexDirection: "column" }}
+              >
+                <label htmlFor={day} style={{ textTransform: "capitalize" }}>
+                  {day}
+                </label>
+                <select id={day} name={day} onChange={handleMealChange}>
+                  {availableEssen.map((essen) => (
+                    <option key={essen._id} value={essen._id}>
+                      {essen.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+        </div>
+        <button type="submit">Essensplan erstellen</button>
+      </form>
+      <div>
+        <h2>Erstellte Essenspläne</h2>
+      </div>
+    </div>
+  );
 };
-
-
