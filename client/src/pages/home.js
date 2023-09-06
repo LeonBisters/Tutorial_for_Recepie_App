@@ -118,7 +118,7 @@ export const Home = () => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+    /* event.preventDefault(); */
 
     try {
       await axios.post("http://localhost:3001/essenplan", essenPlan, {
