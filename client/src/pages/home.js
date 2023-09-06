@@ -84,6 +84,11 @@ export const Home = () => {
     }
   };
 
+  const getEssenNameById = (id) => {
+    const selectedEssen = availableEssen.find((essen) => essen._id === id);
+    return selectedEssen ? selectedEssen.name : "Nicht ausgewählt";
+  };
+
   useEffect(() => {
     fetchAvailableEssen();
     fetchAvailableEssenPlans();
@@ -103,10 +108,6 @@ export const Home = () => {
   useEffect(() => {
     console.log("USEFFECT availableEssen", availableEssen);
   }, [availableEssen]);
-
-  useEffect(() => {
-    console.log("USEFFECT availableEssenPlans", availableEssenPlans);
-  }, [availableEssenPlans]);
 
   return (
     <div className="create-essenplan">
@@ -143,6 +144,21 @@ export const Home = () => {
       </form>
       <div>
         <h2>Erstellte Essenspläne</h2>
+        <ul>
+          {availableEssenPlans.map((plan) => (
+            <li key={plan._id}>
+              <p>Wochennummer: {plan.wochenNummer}</p>
+              <p>Essen pro Woche:</p>
+              <ul>
+                {WEEKDAYS.map((day) => (
+                  <li key={day}>
+                    {day}:{getEssenNameById(plan.essenProWoche[day]?.id)}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
