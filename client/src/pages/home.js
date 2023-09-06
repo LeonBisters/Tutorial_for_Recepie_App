@@ -9,6 +9,9 @@ export const Home = () => {
 
   const [availableEssen, setAvailableEssen] = useState([]);
   const [availableEssenPlans, setAvailableEssenPlans] = useState([]);
+  const [editMode, setEditMode] = useState(false); // Bearbeitungsmodus hinzufügen
+  const [editedPlan, setEditedPlan] = useState(null); // Bearbeiteten Essensplan speichern
+  const [searchWeekNumber, setSearchWeekNumber] = useState("");
 
   const [essenPlan, setEssenplan] = useState({
     wochenNummer: 0,
@@ -41,6 +44,60 @@ export const Home = () => {
         [event.target.id]: { id: event.target.value },
       },
     });
+
+  const handleEditClick = (plan) => {
+    setEditMode(true);
+    setEditedPlan(plan);
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    setEditedPlan(null);
+  };
+
+  const handleUpdatePlan = async () => {
+    try {
+      // Sende die aktualisierten Daten an die Datenbank
+      await axios.put(
+        `http://localhost:3001/essenplan/${editedPlan._id}`,
+        editedPlan,
+        {
+          headers: { authorization: cookies.access_token },
+        }
+      );
+
+      // Aktualisiere die Liste der Essenspläne
+      fetchAvailableEssenPlans();
+
+      // Beende den Bearbeitungsmodus
+      setEditMode(false);
+      setEditedPlan(null);
+    } catch (err) {
+      console.error(err);
+      // Handle Fehler
+    }
+  };
+
+  const handleDeletePlan = async (planId) => {
+    try {
+      // Sende eine Anfrage an die API, um den Essensplan zu löschen
+      await axios.delete(`http://localhost:3001/essenplan/${planId}`, {
+        headers: { authorization: cookies.access_token },
+      });
+
+      // Aktualisiere die Liste der Essenspläne
+      fetchAvailableEssenPlans();
+    } catch (err) {
+      console.error(err);
+      // Handle Fehler
+    }
+  };
+
+  const filteredEssenPlans = availableEssenPlans.filter((plan) =>
+    searchWeekNumber === ""
+      ? true
+      : plan.wochenNummer === parseInt(searchWeekNumber)
+  );
 
   const fetchAvailableEssen = async () => {
     try {
@@ -144,18 +201,65 @@ export const Home = () => {
       </form>
       <div>
         <h2>Erstellte Essenspläne</h2>
+        <input
+          type="text"
+          placeholder="Wochennummer filtern"
+          value={searchWeekNumber}
+          onChange={(e) => setSearchWeekNumber(e.target.value)}
+        />
         <ul>
-          {availableEssenPlans.map((plan) => (
+          {filteredEssenPlans.map((plan) => (
             <li key={plan._id}>
               <p>Wochennummer: {plan.wochenNummer}</p>
               <p>Essen pro Woche:</p>
               <ul>
                 {WEEKDAYS.map((day) => (
                   <li key={day}>
-                    {day}:{getEssenNameById(plan.essenProWoche[day]?.id)}
+                    {day}:{" "}
+                    {editMode && editedPlan && editedPlan._id === plan._id ? (
+                      <select
+                        value={editedPlan.essenProWoche[day]?.id || ""}
+                        onChange={(e) => {
+                          const selectedId = e.target.value;
+                          const selectedName = getEssenNameById(selectedId);
+                          setEditedPlan({
+                            ...editedPlan,
+                            essenProWoche: {
+                              ...editedPlan.essenProWoche,
+                              [day]: { id: selectedId, name: selectedName },
+                            },
+                          });
+                        }}
+                      >
+                        <option value="">Nicht ausgewählt</option>
+                        {availableEssen.map((essen) => (
+                          <option key={essen._id} value={essen._id}>
+                            {essen.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      getEssenNameById(plan.essenProWoche[day]?.id) ||
+                      "Nicht ausgewählt"
+                    )}
                   </li>
                 ))}
               </ul>
+              {editMode && editedPlan && editedPlan._id === plan._id ? (
+                <div>
+                  <button onClick={handleUpdatePlan}>Speichern</button>
+                  <button onClick={handleCancelEdit}>Abbrechen</button>
+                </div>
+              ) : (
+                <div>
+                  <button onClick={() => handleEditClick(plan)}>
+                    Bearbeiten
+                  </button>
+                  <button onClick={() => handleDeletePlan(plan._id)}>
+                    Löschen
+                  </button>
+                </div>
+              )}
             </li>
           ))}
         </ul>
