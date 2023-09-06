@@ -40,18 +40,6 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
-router.put("/", verifyToken, async (req, res) => {
-  try {
-    const essen = await EssenPlanModel.findById(req.body.essenID);
-    const user = await UserModel.findById(req.body.userID);
-    user.savedRecipes.push(essen);
-    await user.save();
-    res.json({ savedRecipes: user.savedRecipes });
-  } catch (err) {
-    res.json(err);
-  }
-});
-
 //Zum bearbeiten
 router.put("/:id", verifyToken, async (req, res) => {
   const { id } = req.params; // Die ID des zu bearbeitenden Essens
