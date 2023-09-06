@@ -4,7 +4,7 @@ import { useCookies } from "react-cookie";
 
 const WEEKDAYS = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag"];
 
-export const Home = () => {
+export const Essensplan = () => {
   const [cookies] = useCookies(["access_token"]);
 
   const [availableEssen, setAvailableEssen] = useState([]);
