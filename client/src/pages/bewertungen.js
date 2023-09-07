@@ -19,6 +19,7 @@ export const Essensbewertung = () => {
       console.error(err);
     }
   };
+
   const fetchBewertungen = async () => {
     try {
       const response = await axios.get("http://localhost:3001/bewertungen");
@@ -36,6 +37,29 @@ export const Essensbewertung = () => {
   const getEssenName = (essenId) => {
     const selectedEssen = availableEssen.find((essen) => essen._id === essenId);
     return selectedEssen ? selectedEssen.name : "Unbekanntes Essen";
+  };
+
+  const groupAndSortBewertungen = () => {
+    const groupedBewertungen = {};
+
+    bewertungen.forEach((bewertung) => {
+      const essenName = getEssenName(bewertung.essenId);
+      if (!groupedBewertungen[essenName]) {
+        groupedBewertungen[essenName] = [];
+      }
+      groupedBewertungen[essenName].push(bewertung);
+    });
+
+    // Sortieren Sie die Speisen alphabetisch nach dem Namen
+    const sortedSpeisen = Object.keys(groupedBewertungen).sort();
+
+    // Erstellen Sie ein Array mit den gruppierten und sortierten Bewertungen
+    const sortedBewertungen = sortedSpeisen.map((essenName) => ({
+      essenName,
+      bewertungen: groupedBewertungen[essenName],
+    }));
+
+    return sortedBewertungen;
   };
 
   const handleRate = async () => {
@@ -60,6 +84,8 @@ export const Essensbewertung = () => {
       console.error("Fehler beim Speichern der Bewertung:", err);
     }
   };
+
+  const sortedBewertungen = groupAndSortBewertungen();
 
   return (
     <div className="essensBewertung">
@@ -116,11 +142,17 @@ export const Essensbewertung = () => {
       <div>
         <h2>Vergangene Bewertungen</h2>
         <ul>
-          {bewertungen.map((bewertung) => (
-            <li key={bewertung._id}>
-              <h3>{getEssenName(bewertung.essenId)}</h3>
-              <p>Sterne: {bewertung.stars}</p>
-              <p>Kommentar: {bewertung.comment}</p>
+          {sortedBewertungen.map((speise) => (
+            <li key={speise.essenName}>
+              <h3>{speise.essenName}</h3>
+              <ul>
+                {speise.bewertungen.map((bewertung) => (
+                  <li key={bewertung._id}>
+                    <p>Sterne: {bewertung.stars}</p>
+                    <p>Kommentar: {bewertung.comment}</p>
+                  </li>
+                ))}
+              </ul>
             </li>
           ))}
         </ul>
