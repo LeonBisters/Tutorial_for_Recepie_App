@@ -5,6 +5,7 @@ export const Essensbewertung = () => {
   const [availableEssen, setAvailableEssen] = useState([]);
   const [selectedEssen, setSelectedEssen] = useState(null);
   const [bewertungen, setBewertungen] = useState([]);
+  const [selectedBewertung, setSelectedBewertung] = useState(null);
 
   const [ratingData, setRatingData] = useState({
     stars: "1",
@@ -78,11 +79,43 @@ export const Essensbewertung = () => {
         comment: "",
       });
 
-      // Deselektieren Sie das ausgewählte Essen
+      // Deselektieren Sie das ausgewählte Essen und die Bewertung
       setSelectedEssen(null);
+      setSelectedBewertung(null);
+
+      // Aktualisieren Sie die Bewertungen, um die neuen Daten anzuzeigen
       fetchBewertungen();
     } catch (err) {
       console.error("Fehler beim Speichern der Bewertung:", err);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const response = await axios.put(
+        `http://localhost:3001/bewertungen/${selectedBewertung._id}`,
+        {
+          stars: ratingData.stars,
+          comment: ratingData.comment,
+        }
+      );
+
+      console.log("Bewertung aktualisiert:", response.data);
+
+      // Schließen Sie das Bewertungsfenster und setzen Sie die Bewertungsdaten zurück
+      setRatingData({
+        stars: "1",
+        comment: "",
+      });
+
+      // Deselektieren Sie das ausgewählte Essen und die Bewertung
+      setSelectedEssen(null);
+      setSelectedBewertung(null);
+
+      // Aktualisieren Sie die Bewertungen, um die neuen Daten anzuzeigen
+      fetchBewertungen();
+    } catch (err) {
+      console.error("Fehler beim Aktualisieren der Bewertung:", err);
     }
   };
 
@@ -105,7 +138,11 @@ export const Essensbewertung = () => {
       {/* Zeigen Sie das Bewertungsfenster an, wenn ein Essen ausgewählt wurde */}
       {selectedEssen && (
         <div className="rating-modal">
-          <h3>Bewertung abgeben für {selectedEssen.name}</h3>
+          <h3>
+            {selectedBewertung
+              ? "Bewertung bearbeiten"
+              : `Bewertung abgeben für ${selectedEssen.name}`}
+          </h3>
           <div>
             <label>Sterne (1-5):</label>
             <select
@@ -137,7 +174,11 @@ export const Essensbewertung = () => {
               required
             />
           </div>
-          <button onClick={handleRate}>Bewertung abschicken</button>
+          {selectedBewertung ? (
+            <button onClick={handleUpdate}>Aktualisieren</button>
+          ) : (
+            <button onClick={handleRate}>Bewertung abschicken</button>
+          )}
         </div>
       )}
       <div>
@@ -151,6 +192,9 @@ export const Essensbewertung = () => {
                   <li key={bewertung._id}>
                     <p>Sterne: {bewertung.stars}</p>
                     <p>Kommentar: {bewertung.comment}</p>
+                    <button onClick={() => setSelectedBewertung(bewertung)}>
+                      Bearbeiten
+                    </button>
                   </li>
                 ))}
               </ul>
