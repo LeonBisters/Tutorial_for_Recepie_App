@@ -80,6 +80,7 @@ export const Essensbewertung = () => {
 
       // Deselektieren Sie das ausgewählte Essen
       setSelectedEssen(null);
+      fetchBewertungen();
     } catch (err) {
       console.error("Fehler beim Speichern der Bewertung:", err);
     }
