@@ -4,7 +4,7 @@ import axios from "axios";
 export const Essensbewertung = () => {
   const [availableEssen, setAvailableEssen] = useState([]);
   const [selectedEssen, setSelectedEssen] = useState(null);
-  const [userBewertungen, setUserBewertungen] = useState({}); // Bewertungen des Benutzers
+  const [bewertungen, setBewertungen] = useState([]);
 
   const [ratingData, setRatingData] = useState({
     stars: "1",
@@ -19,13 +19,10 @@ export const Essensbewertung = () => {
       console.error(err);
     }
   };
-
-  const fetchUserBewertungen = async () => {
+  const fetchBewertungen = async () => {
     try {
       const response = await axios.get("http://localhost:3001/bewertungen");
-      // Annahme: Bewertungen sind nach Essen und Benutzer gruppiert
-      // Hier wird angenommen, dass der Benutzer mit einer ID authentifiziert ist.
-      setUserBewertungen(response.data);
+      setBewertungen(response.data);
     } catch (err) {
       console.error(err);
     }
@@ -33,8 +30,13 @@ export const Essensbewertung = () => {
 
   useEffect(() => {
     fetchAvailableEssen();
-    fetchUserBewertungen();
+    fetchBewertungen();
   }, []);
+
+  const getEssenName = (essenId) => {
+    const selectedEssen = availableEssen.find((essen) => essen._id === essenId);
+    return selectedEssen ? selectedEssen.name : "Unbekanntes Essen";
+  };
 
   const handleRate = async () => {
     try {
@@ -113,6 +115,15 @@ export const Essensbewertung = () => {
       )}
       <div>
         <h2>Vergangene Bewertungen</h2>
+        <ul>
+          {bewertungen.map((bewertung) => (
+            <li key={bewertung._id}>
+              <h3>{getEssenName(bewertung.essenId)}</h3>
+              <p>Sterne: {bewertung.stars}</p>
+              <p>Kommentar: {bewertung.comment}</p>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
