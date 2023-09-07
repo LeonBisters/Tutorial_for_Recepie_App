@@ -64,21 +64,10 @@ export const Essensbewertung = () => {
       <h2>Essensbewertung</h2>
       <ul>
         {availableEssen.map((essen) => {
-          const userBewertung = userBewertungen[essen._id];
           return (
             <li key={essen._id}>
               {essen.name}
-              {userBewertung ? (
-                <div>
-                  <p>Deine Bewertung:</p>
-                  <p>Sterne: {userBewertung.stars}</p>
-                  <p>Kommentar: {userBewertung.comment}</p>
-                </div>
-              ) : (
-                <button onClick={() => setSelectedEssen(essen)}>
-                  Bewerten
-                </button>
-              )}
+              <button onClick={() => setSelectedEssen(essen)}>Bewerten</button>
             </li>
           );
         })}
@@ -122,6 +111,9 @@ export const Essensbewertung = () => {
           <button onClick={handleRate}>Bewertung abschicken</button>
         </div>
       )}
+      <div>
+        <h2>Vergangene Bewertungen</h2>
+      </div>
     </div>
   );
 };
