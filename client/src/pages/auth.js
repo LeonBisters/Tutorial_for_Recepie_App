@@ -30,6 +30,7 @@ const Login = () => {
 
       setCookies("access_token", response.data.token);
       window.localStorage.setItem("userID", response.data.userID);
+      window.localStorage.removeItem("loggedOutID");
       navigate("/");
     } catch (err) {
       console.error(err);

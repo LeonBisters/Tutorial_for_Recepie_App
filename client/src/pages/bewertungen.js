@@ -6,6 +6,7 @@ export const Essensbewertung = () => {
   const [selectedEssen, setSelectedEssen] = useState(null);
   const [bewertungen, setBewertungen] = useState([]);
   const [selectedBewertung, setSelectedBewertung] = useState(null);
+  const isAdminLoggedIn = !!localStorage.getItem("userID");
 
   const [ratingData, setRatingData] = useState({
     stars: "1",
@@ -25,25 +26,31 @@ export const Essensbewertung = () => {
     try {
       const response = await axios.get("http://localhost:3001/bewertungen");
       setBewertungen(response.data);
+      groupAndSortBewertungen(response.data);
     } catch (err) {
       console.error(err);
     }
   };
-
-  useEffect(() => {
-    fetchAvailableEssen();
-    fetchBewertungen();
-  }, []);
 
   const getEssenName = (essenId) => {
     const selectedEssen = availableEssen.find((essen) => essen._id === essenId);
     return selectedEssen ? selectedEssen.name : "Unbekanntes Essen";
   };
 
-  const groupAndSortBewertungen = () => {
+  const isEssenUpdateableByMe = (bewertungsid) => {
+    const temp = localStorage.getItem(
+      `essen-rated-${bewertungsid}-${localStorage.getItem(
+        `${isAdminLoggedIn ? "userID" : "loggedOutID"}`
+      )}`
+    );
+
+    return !!temp;
+  };
+
+  const groupAndSortBewertungen = (bewertungsArray) => {
     const groupedBewertungen = {};
 
-    bewertungen.forEach((bewertung) => {
+    bewertungsArray.forEach((bewertung) => {
       const essenName = getEssenName(bewertung.essenId);
       if (!groupedBewertungen[essenName]) {
         groupedBewertungen[essenName] = [];
@@ -71,8 +78,12 @@ export const Essensbewertung = () => {
         comment: ratingData.comment,
       });
 
-      console.log("Bewertung gespeichert:", response.data);
-
+      localStorage.setItem(
+        `essen-rated-${response.data._id}-${localStorage.getItem(
+          `${isAdminLoggedIn ? "userID" : "loggedOutID"}`
+        )}`,
+        true
+      );
       // Schließen Sie das Bewertungsfenster und setzen Sie die Bewertungsdaten zurück
       setRatingData({
         stars: "1",
@@ -100,8 +111,6 @@ export const Essensbewertung = () => {
         }
       );
 
-      console.log("Bewertung aktualisiert:", response.data);
-
       // Schließen Sie das Bewertungsfenster und setzen Sie die Bewertungsdaten zurück
       setRatingData({
         stars: "1",
@@ -119,19 +128,82 @@ export const Essensbewertung = () => {
     }
   };
 
-  const sortedBewertungen = groupAndSortBewertungen();
+  const sortedBewertungen = groupAndSortBewertungen(bewertungen);
+
+  const isEssenAlreadyRatedByMe = (essenId) => {
+    let returnValue = false;
+    bewertungen.length > 0 &&
+      bewertungen.forEach((bewertung) => {
+        // Suchbegriff, nach dem Sie im Schlüssel suchen möchten
+        let searchTerm = "essen";
+
+        // Alle Schlüssel aus dem Local Storage abrufen
+        let keys = Object.keys(localStorage);
+
+        // Schlüssel durchgehen und nach Übereinstimmungen suchen
+        keys &&
+          keys.forEach(function (key) {
+            if (
+              key.includes(searchTerm) &&
+              key.includes(
+                localStorage.getItem(isAdminLoggedIn ? "userID" : "loggedOutID")
+              )
+            ) {
+              if (
+                key.split("-")[2] === bewertung._id &&
+                essenId === bewertung.essenId
+              ) {
+                returnValue = true;
+                return;
+              }
+            }
+          });
+      });
+    return returnValue;
+  };
+
+  useEffect(() => {
+    fetchAvailableEssen();
+    fetchBewertungen();
+
+    if (isAdminLoggedIn) {
+      // Suchbegriff, nach dem Sie im Schlüssel suchen möchten
+      let searchTerm = "essen";
+
+      // Alle Schlüssel aus dem Local Storage abrufen
+      let keys = Object.keys(localStorage);
+
+      // Schlüssel durchgehen und nach Übereinstimmungen suchen
+      keys &&
+        keys.forEach(function (key) {
+          if (key.includes(searchTerm)) {
+            // Wenn der Schlüssel den Suchbegriff enthält, löschen Sie ihn
+            localStorage.removeItem(key);
+          }
+        });
+    }
+  }, []);
 
   return (
     <div className="essensBewertung">
       <h2>Essensbewertung</h2>
       <ul>
         {availableEssen.map((essen) => {
-          return (
-            <li key={essen._id}>
-              {essen.name}
-              <button onClick={() => setSelectedEssen(essen)}>Bewerten</button>
-            </li>
-          );
+          if (essen._id !== "64fb8c6b96dc8ae1a1a1ceb4") {
+            return (
+              <li key={essen._id}>
+                {essen.name}
+                {!isEssenAlreadyRatedByMe(essen._id) && (
+                  <button onClick={() => setSelectedEssen(essen)}>
+                    Bewerten
+                  </button>
+                )}
+                {/* <button onClick={() => setSelectedEssen(essen)}>
+                  Bewerten
+                </button> */}
+              </li>
+            );
+          }
         })}
       </ul>
 
@@ -192,9 +264,21 @@ export const Essensbewertung = () => {
                   <li key={bewertung._id}>
                     <p>Sterne: {bewertung.stars}</p>
                     <p>Kommentar: {bewertung.comment}</p>
-                    <button onClick={() => setSelectedBewertung(bewertung)}>
-                      Bearbeiten
-                    </button>
+                    {isEssenUpdateableByMe(bewertung._id) && (
+                      <button
+                        onClick={() => {
+                          setSelectedBewertung(bewertung);
+                          setSelectedEssen(
+                            availableEssen.filter(
+                              (oneAvailableEssen) =>
+                                oneAvailableEssen._id === bewertung.essenId
+                            )
+                          );
+                        }}
+                      >
+                        Bearbeiten
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>

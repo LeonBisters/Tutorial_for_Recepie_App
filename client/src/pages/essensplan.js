@@ -6,6 +6,7 @@ const WEEKDAYS = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag"];
 
 export const Essensplan = () => {
   const [cookies] = useCookies(["access_token"]);
+  const isAdminLoggedIn = !!localStorage.getItem("userID");
 
   const [availableEssen, setAvailableEssen] = useState([]);
   const [availableEssenPlans, setAvailableEssenPlans] = useState([]);
@@ -151,54 +152,46 @@ export const Essensplan = () => {
     fetchAvailableEssenPlans();
   }, []);
 
-  /*   const handleSelectChange = (day, selectedValue) => {
-    setSelectedEssen((prevSelectedEssen) => ({
-      ...prevSelectedEssen,
-      [day]: selectedValue,
-    }));
-  }; */
-
-  useEffect(() => {
-    console.log("USEFFECT essenPlan", essenPlan);
-  }, [essenPlan]);
-
-  useEffect(() => {
-    console.log("USEFFECT availableEssen", availableEssen);
-  }, [availableEssen]);
-
   return (
     <div className="create-essenplan">
-      <h2>Essensplan erstellen</h2>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="wochenNummer">Wochennummer</label>
-        <input
-          type="number"
-          id="wochenNummer"
-          name="wochenNummer"
-          onChange={handleWeekNumberChange}
-        />
-        <div>
-          {essenPlan.wochenNummer > 0 &&
-            WEEKDAYS.map((day) => (
-              <div
-                key={day}
-                style={{ display: "flex", flexDirection: "column" }}
-              >
-                <label htmlFor={day} style={{ textTransform: "capitalize" }}>
-                  {day}
-                </label>
-                <select id={day} name={day} onChange={handleMealChange}>
-                  {availableEssen.map((essen) => (
-                    <option key={essen._id} value={essen._id}>
-                      {essen.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ))}
-        </div>
-        <button type="submit">Essensplan erstellen</button>
-      </form>
+      {isAdminLoggedIn && (
+        <>
+          <h2>Essensplan erstellen</h2>
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="wochenNummer">Wochennummer</label>
+            <input
+              type="number"
+              id="wochenNummer"
+              name="wochenNummer"
+              onChange={handleWeekNumberChange}
+            />
+            <div>
+              {essenPlan.wochenNummer > 0 &&
+                WEEKDAYS.map((day) => (
+                  <div
+                    key={day}
+                    style={{ display: "flex", flexDirection: "column" }}
+                  >
+                    <label
+                      htmlFor={day}
+                      style={{ textTransform: "capitalize" }}
+                    >
+                      {day}
+                    </label>
+                    <select id={day} name={day} onChange={handleMealChange}>
+                      {availableEssen.map((essen) => (
+                        <option key={essen._id} value={essen._id}>
+                          {essen.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+            </div>
+            <button type="submit">Essensplan erstellen</button>
+          </form>
+        </>
+      )}
       <div>
         <h2>Erstellte Essenspläne</h2>
         <input
@@ -231,12 +224,20 @@ export const Essensplan = () => {
                           });
                         }}
                       >
-                        <option value="">Nicht ausgewählt</option>
-                        {availableEssen.map((essen) => (
-                          <option key={essen._id} value={essen._id}>
-                            {essen.name}
-                          </option>
-                        ))}
+                        {availableEssen
+                          .sort(function (a, b) {
+                            return (
+                              (b._id === "64fb8c6b96dc8ae1a1a1ceb4") -
+                              (a._id === "64fb8c6b96dc8ae1a1a1ceb4")
+                            );
+                          })
+                          .map((essen) => {
+                            return (
+                              <option key={essen._id} value={essen._id}>
+                                {essen.name}
+                              </option>
+                            );
+                          })}
                       </select>
                     ) : (
                       getEssenNameById(plan.essenProWoche[day]?.id) ||
@@ -251,14 +252,16 @@ export const Essensplan = () => {
                   <button onClick={handleCancelEdit}>Abbrechen</button>
                 </div>
               ) : (
-                <div>
-                  <button onClick={() => handleEditClick(plan)}>
-                    Bearbeiten
-                  </button>
-                  <button onClick={() => handleDeletePlan(plan._id)}>
-                    Löschen
-                  </button>
-                </div>
+                isAdminLoggedIn && (
+                  <div>
+                    <button onClick={() => handleEditClick(plan)}>
+                      Bearbeiten
+                    </button>
+                    <button onClick={() => handleDeletePlan(plan._id)}>
+                      Löschen
+                    </button>
+                  </div>
+                )
               )}
             </li>
           ))}
