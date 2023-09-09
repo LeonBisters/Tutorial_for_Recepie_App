@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useGetUserID } from "../hooks/useGetUserID";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
+import { LanguageContext } from "../App";
 
 export const CreateEssen = () => {
+  const [language, setLanguage] = useContext(LanguageContext);
   const userID = useGetUserID();
   const [cookies, _] = useCookies(["access_token"]);
   const isAdminLoggedIn = !!localStorage.getItem("userID");
@@ -98,11 +100,13 @@ export const CreateEssen = () => {
     <div className="create-essen">
       {isAdminLoggedIn && (
         <>
-          <h2> Essen hinzufügen</h2>
+          <h2> {language === "DE" ? "Essen hinzufügen" : "Add Meal"}</h2>
           <form onSubmit={onSubmit}>
-            <label htmlFor="name"> Name</label>
+            <label htmlFor="name"> {language === "DE" ? "Name" : "Name"}</label>
             <input type="text" id="name" name="name" onChange={handleChange} />
-            <label htmlFor="preis">Preis €</label>
+            <label htmlFor="preis">
+              {language === "DE" ? "Preis" : "Price"} €
+            </label>
             <input
               type="number"
               id="preis"
@@ -112,16 +116,23 @@ export const CreateEssen = () => {
             />
             <label htmlFor="art">Art</label>
             <select id="art" name="art" onChange={handleChange}>
-              <option value="vegetarisch">Vegetarisch</option>
-              <option value="vegan">Vegan</option>
-              <option value="mit Fleisch">Mit Fleisch</option>
+              <option value="vegetarisch">
+                {language === "DE" ? "vegetarisch" : "vegetarian"}
+              </option>
+              <option value="vegan">vegan</option>
+              <option value="mit Fleisch">
+                {language === "DE" ? "mit Fleisch" : "with Meat"}
+              </option>
             </select>
-            <button type="submit"> Essen hinzufügen</button>
+            <button type="submit">
+              {" "}
+              {language === "DE" ? "Essen hinzufügen" : "Add Meal"}
+            </button>
           </form>
         </>
       )}
       <div>
-        <h2>Hinzugefügte essen</h2>
+        <h2>{language === "DE" ? "Hinzugefügte Essen" : "Added Meals"}</h2>
         <ul>
           {savedEssen.map((savedEssen) => {
             if (savedEssen._id === "64fb8c6b96dc8ae1a1a1ceb4") {
@@ -153,12 +164,16 @@ export const CreateEssen = () => {
                         handleEditChange(e, savedEssen._id, "art")
                       }
                     >
-                      <option value="vegetarisch">Vegetarisch</option>
-                      <option value="vegan">Vegan</option>
-                      <option value="mit Fleisch">Mit Fleisch</option>
+                      <option value="vegetarisch">
+                        {language === "DE" ? "vegetarisch" : "vegetarian"}
+                      </option>
+                      <option value="vegan">vegan</option>
+                      <option value="mit Fleisch">
+                        {language === "DE" ? "mit Fleisch" : "with Meat"}
+                      </option>
                     </select>
                     <button onClick={() => saveEdit(savedEssen._id)}>
-                      Speichern
+                      {language === "DE" ? "Speichern" : "Save"}
                     </button>
                   </div>
                 ) : (
@@ -167,15 +182,17 @@ export const CreateEssen = () => {
                     <h2>{savedEssen.name}</h2>
                   </div>
                 )}
-                <p>Preis: {savedEssen.preis} € </p>
+                <p>
+                  {language === "DE" ? "Preis" : "Price"}: {savedEssen.preis} €
+                </p>
                 <p>Art: {savedEssen.art} </p>
                 {isAdminLoggedIn && (
                   <>
                     <button onClick={() => startEditing(savedEssen._id)}>
-                      Bearbeiten
+                      {language === "DE" ? "Bearbeiten" : "Update"}
                     </button>
                     <button onClick={() => deleteEssen(savedEssen._id)}>
-                      Löschen
+                      {language === "DE" ? "Löschen" : "Delete"}
                     </button>
                   </>
                 )}

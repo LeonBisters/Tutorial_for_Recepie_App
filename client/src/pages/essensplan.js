@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useCookies } from "react-cookie";
+import { LanguageContext } from "../App";
 
 const WEEKDAYS = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag"];
 
@@ -13,6 +14,7 @@ export const Essensplan = () => {
   const [editMode, setEditMode] = useState(false); // Bearbeitungsmodus hinzufügen
   const [editedPlan, setEditedPlan] = useState(null); // Bearbeiteten Essensplan speichern
   const [searchWeekNumber, setSearchWeekNumber] = useState("");
+  const [language, setLanguage] = useContext(LanguageContext);
 
   const [essenPlan, setEssenplan] = useState({
     wochenNummer: 0,
@@ -156,9 +158,13 @@ export const Essensplan = () => {
     <div className="create-essenplan">
       {isAdminLoggedIn && (
         <>
-          <h2>Essensplan erstellen</h2>
+          <h2>
+            {language === "DE" ? "Essensplan erstellen" : "Create Mealplan"}
+          </h2>
           <form onSubmit={handleSubmit}>
-            <label htmlFor="wochenNummer">Wochennummer</label>
+            <label htmlFor="wochenNummer">
+              {language === "DE" ? "Wochennummer" : "Weeknumber"}
+            </label>
             <input
               type="number"
               id="wochenNummer"
@@ -188,12 +194,16 @@ export const Essensplan = () => {
                   </div>
                 ))}
             </div>
-            <button type="submit">Essensplan erstellen</button>
+            <button type="submit">
+              {language === "DE" ? "Essensplan erstellen" : "Create Mealplan"}
+            </button>
           </form>
         </>
       )}
       <div>
-        <h2>Erstellte Essenspläne</h2>
+        <h2>
+          {language === "DE" ? "Erstellte Essenspläne" : "Created Mealplans"}
+        </h2>
         <input
           type="text"
           placeholder="Wochennummer filtern"
@@ -203,8 +213,11 @@ export const Essensplan = () => {
         <ul>
           {filteredEssenPlans.map((plan) => (
             <li key={plan._id}>
-              <p>Wochennummer: {plan.wochenNummer}</p>
-              <p>Essen pro Woche:</p>
+              <p>
+                {language === "DE" ? "Wochennummer" : "Weeknumber"}:
+                {plan.wochenNummer}
+              </p>
+              <p>{language === "DE" ? "Essen pro Woche" : "Meals per week"}:</p>
               <ul>
                 {WEEKDAYS.map((day) => (
                   <li key={day}>
@@ -248,17 +261,21 @@ export const Essensplan = () => {
               </ul>
               {editMode && editedPlan && editedPlan._id === plan._id ? (
                 <div>
-                  <button onClick={handleUpdatePlan}>Speichern</button>
-                  <button onClick={handleCancelEdit}>Abbrechen</button>
+                  <button onClick={handleUpdatePlan}>
+                    {language === "DE" ? "Speichern" : "Save"}
+                  </button>
+                  <button onClick={handleCancelEdit}>
+                    {language === "DE" ? "Abbrechen" : "Cancel"}
+                  </button>
                 </div>
               ) : (
                 isAdminLoggedIn && (
                   <div>
                     <button onClick={() => handleEditClick(plan)}>
-                      Bearbeiten
+                      {language === "DE" ? "Bearbeiten" : "Update"}
                     </button>
                     <button onClick={() => handleDeletePlan(plan._id)}>
-                      Löschen
+                      {language === "DE" ? "Löschen" : "Delete"}
                     </button>
                   </div>
                 )

@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { LanguageContext } from "../App";
 
 export const Essensbewertung = () => {
+  const [language, setLanguage] = useContext(LanguageContext);
   const [availableEssen, setAvailableEssen] = useState([]);
   const [selectedEssen, setSelectedEssen] = useState(null);
   const [bewertungen, setBewertungen] = useState([]);
@@ -186,7 +188,7 @@ export const Essensbewertung = () => {
 
   return (
     <div className="essensBewertung">
-      <h2>Essensbewertung</h2>
+      <h2>{language === "DE" ? "Essensbewertung" : "Meal Ratings"}</h2>
       <ul>
         {availableEssen.map((essen) => {
           if (essen._id !== "64fb8c6b96dc8ae1a1a1ceb4") {
@@ -195,7 +197,7 @@ export const Essensbewertung = () => {
                 {essen.name}
                 {!isEssenAlreadyRatedByMe(essen._id) && (
                   <button onClick={() => setSelectedEssen(essen)}>
-                    Bewerten
+                    {language === "DE" ? "Bewerten" : "Rate"}
                   </button>
                 )}
                 {/* <button onClick={() => setSelectedEssen(essen)}>
@@ -216,7 +218,7 @@ export const Essensbewertung = () => {
               : `Bewertung abgeben für ${selectedEssen.name}`}
           </h3>
           <div>
-            <label>Sterne (1-5):</label>
+            <label>{language === "DE" ? "Sterne" : "Stars"}(1-5):</label>
             <select
               value={ratingData.stars}
               onChange={(e) =>
@@ -226,15 +228,25 @@ export const Essensbewertung = () => {
                 })
               }
             >
-              <option value="1">1 Stern</option>
-              <option value="2">2 Sterne</option>
-              <option value="3">3 Sterne</option>
-              <option value="4">4 Sterne</option>
-              <option value="5">5 Sterne</option>
+              <option value="1">
+                1 {language === "DE" ? "Sterne" : "Stars"}
+              </option>
+              <option value="2">
+                2 {language === "DE" ? "Sterne" : "Stars"}
+              </option>
+              <option value="3">
+                3 {language === "DE" ? "Sterne" : "Stars"}
+              </option>
+              <option value="4">
+                4 {language === "DE" ? "Sterne" : "Stars"}
+              </option>
+              <option value="5">
+                5 {language === "DE" ? "Sterne" : "Stars"}
+              </option>
             </select>
           </div>
           <div>
-            <label>Kommentar:</label>
+            <label>{language === "DE" ? "Kommentar" : "Comment"}:</label>
             <textarea
               value={ratingData.comment}
               onChange={(e) =>
@@ -247,14 +259,20 @@ export const Essensbewertung = () => {
             />
           </div>
           {selectedBewertung ? (
-            <button onClick={handleUpdate}>Aktualisieren</button>
+            <button onClick={handleUpdate}>
+              {language === "DE" ? "Aktualisieren" : "Update"}
+            </button>
           ) : (
-            <button onClick={handleRate}>Bewertung abschicken</button>
+            <button onClick={handleRate}>
+              {language === "DE" ? "Bewertung abschicken" : "Send Rate"}
+            </button>
           )}
         </div>
       )}
       <div>
-        <h2>Vergangene Bewertungen</h2>
+        <h2>
+          {language === "DE" ? "Vergangene Bewertungen" : "Recent Ratings"}
+        </h2>
         <ul>
           {sortedBewertungen.map((speise) => (
             <li key={speise.essenName}>
@@ -262,8 +280,13 @@ export const Essensbewertung = () => {
               <ul>
                 {speise.bewertungen.map((bewertung) => (
                   <li key={bewertung._id}>
-                    <p>Sterne: {bewertung.stars}</p>
-                    <p>Kommentar: {bewertung.comment}</p>
+                    <p>
+                      {language === "DE" ? "Sterne" : "Stars"}:{bewertung.stars}
+                    </p>
+                    <p>
+                      {language === "DE" ? "Kommentar" : "Comment"}:{" "}
+                      {bewertung.comment}
+                    </p>
                     {isEssenUpdateableByMe(bewertung._id) && (
                       <button
                         onClick={() => {
@@ -276,7 +299,7 @@ export const Essensbewertung = () => {
                           );
                         }}
                       >
-                        Bearbeiten
+                        {language === "DE" ? "Bearbeiten" : "Update"}
                       </button>
                     )}
                   </li>
